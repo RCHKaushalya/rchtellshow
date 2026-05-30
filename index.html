@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lesson 1: From Zero to Hello World in NASM</title>
+  <meta name="description" content="Lesson 1 of NASM learning: CPU basics, Linux syscalls, and first Hello World program in x86-64 assembly." />
+  <style>
+    :root {
+      --bg: #eaf6ff;
+      --paper: #fafdff;
+      --ink: #102033;
+      --muted: #4a647d;
+      --accent: #1d7fc2;
+      --line: #c9e4f7;
+      --code-bg: #edf7ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, #ffffff 0, transparent 45%),
+        radial-gradient(circle at 100% 0, #d8efff 0, transparent 38%),
+        var(--bg);
+      line-height: 1.65;
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1rem 4rem;
+    }
+
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 12px 32px rgba(15, 56, 92, 0.12);
+    }
+
+    h1, h2 {
+      line-height: 1.25;
+      margin-top: 1.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      letter-spacing: 0.01em;
+    }
+
+    h2 {
+      font-size: clamp(1.25rem, 2vw, 1.6rem);
+      color: var(--accent);
+    }
+
+    p {
+      margin: 0.7rem 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+    }
+
+    code {
+      font-family: "Cascadia Mono", Consolas, Menlo, monospace;
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.05rem 0.35rem;
+      font-size: 0.95em;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+
+    pre code {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      display: block;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin: 0.35rem 0;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent);
+      padding: 0.75rem 1rem;
+      background: #e8f5ff;
+      border-radius: 8px;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 640px) {
+      article {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <article>
+      <h1>Lesson 1: From Zero to Hello World in NASM</h1>
+      <p class="meta">Series: NASM Learning | Platform: Ubuntu/Linux x86-64</p>
+
+      <p>I've been comfortable writing Python and JavaScript for a while now. But honestly? I felt like I was just pressing buttons and watching things happen. I didn't know what the machine was actually <em>doing</em> underneath. So I decided to learn assembly — specifically NASM x86-64 on Linux. This is what I learned in week one, and how everything starts to connect.</p>
+
+      <h2>What Actually Happens When You Run Code</h2>
+      <p>Before writing a single line of assembly, I needed to understand one thing: what is a CPU actually doing?</p>
+      <p>It's simpler than you'd think. The CPU reads an instruction from memory, one at a time, and executes it. Then it reads the next one. Then the next. That's the entire loop — billions of times per second. Every program you've ever written — web frameworks, games, everything — is ultimately just that loop running your instructions.</p>
+      <p>NASM lets you write those instructions directly. No interpreter. No compiler making choices for you. You're talking straight to the CPU.</p>
+
+      <h2>Three Things You Must Know First</h2>
+
+      <h3>1. Registers — The CPU's Scratch Pad</h3>
+      <p>The CPU doesn't work on RAM directly. It has tiny, ultra-fast storage built into itself called registers. Think of them like variables that live <em>inside</em> the chip. In 64-bit mode, the main ones are named <code>rax</code>, <code>rbx</code>, <code>rcx</code>, <code>rdx</code>, <code>rsi</code>, <code>rdi</code>, <code>rsp</code>, <code>rbp</code>, and a few more. Each holds 64 bits (8 bytes) of data.</p>
+      <p>When you want to add two numbers, you load them into registers, add them there, then optionally move the result back to RAM.</p>
+
+      <h3>2. Memory — The Big Slow Storage</h3>
+      <p>RAM is where your program's code and data actually live. It's a giant array of bytes, each with an address. The CPU constantly reads from and writes to it, but registers are always the middle-man.</p>
+
+      <h3>3. The Stack — Memory With a Discipline</h3>
+      <p>The stack is a special region of memory that grows and shrinks as your program runs. It follows one rule: last in, first out. You push values onto it and pop them off. It's used for local variables, saving registers, and making function calls work.</p>
+
+      <p>Two registers are especially important:</p>
+      <ul>
+        <li><code>rip</code>: always points at the <em>next</em> instruction to execute. The CPU's job is read <code>rip</code> → run it → move <code>rip</code> forward → repeat.</li>
+        <li><code>rsp</code>: always points at the top of the stack. It moves down (yes, down — the stack grows toward lower addresses) when you push, and up when you pop.</li>
+      </ul>
+
+      <h2>How Assembly Talks to the Kernel</h2>
+      <p>Here's the key idea: assembly can't print text on its own. It can't exit. It has to <em>ask</em> the Linux kernel to do these things. This request is called a <code>syscall</code> — a system call.</p>
+      <p>Think of it like filling out a form. You put what you want in specific registers, call <code>syscall</code>, and the kernel reads that form and does the work.</p>
+      <p>The pattern is always the same:</p>
+      <ul>
+        <li><code>rax</code> = the syscall number (what service you want — like "is this the <code>write</code> service or the <code>exit</code> service?")</li>
+        <li><code>rdi</code>, <code>rsi</code>, <code>rdx</code> = the arguments (the details for that service)</li>
+        <li>Then you execute <code>syscall</code> and the kernel handles it</li>
+      </ul>
+      <p>For this lesson, two syscalls matter:</p>
+      <ul>
+        <li><code>write</code> (number 1): file descriptor in <code>rdi</code> (1 = screen), address in <code>rsi</code>, length in <code>rdx</code></li>
+        <li><code>exit</code> (number 60): exit code in <code>rdi</code></li>
+      </ul>
+
+      <h2>Install NASM (All OS)</h2>
+      <p>Use Ubuntu/Linux commands for this lesson. If you are on another OS, install NASM first then use your Linux environment for the build/run steps.</p>
+      <ul>
+        <li>Ubuntu/Debian Linux: <code>sudo apt update && sudo apt install nasm gcc</code></li>
+        <li>macOS (Homebrew): <code>brew install nasm</code></li>
+        <li>Windows: download NASM from <code>nasm.us</code>, then use a Linux environment (WSL, Docker, or VM) for linking and running</li>
+      </ul>
+      <p>Verify:</p>
+      <pre><code>nasm --version
+ld --version</code></pre>
+
+      <h2>Your First Program</h2>
+      <p>Here it is. Before you run it, I want you to read it and think about what each line does:</p>
+      <pre><code>section .data
+    msg db "Hello, World!", 10
+    len equ $ - msg
+
+section .text
+    global _start
+
+_start:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg
+    mov rdx, len
+    syscall
+
+    mov rax, 60
+    mov rdi, 0
+    syscall</code></pre>
+
+      <div class="note">
+        <p><strong>What's happening:</strong> <code>.data</code> section holds your data (the string). <code>.text</code> section holds your code. <code>db</code> means "define bytes" — NASM will write those characters (plus the newline, which is ASCII 10) into memory. <code>len equ $ - msg</code> is clever: <code>$</code> means "current position" and <code>msg</code> is where the string started, so <code>$ - msg</code> calculates the byte length. No manual counting needed.</p>
+      </div>
+
+      <h2>Build It</h2>
+      <pre><code>nasm -f elf64 hello.asm -o hello.o
+ld hello.o -o hello
+./hello</code></pre>
+
+      <p>You should see:</p>
+      <pre><code>Hello, World!</code></pre>
+
+      <p>Now run this:</p>
+      <pre><code>echo $?</code></pre>
+
+      <p>You'll see <code>0</code>. That's the exit code — whatever value you put in <code>rdi</code> before the <code>exit</code> syscall, the shell reports it afterward.</p>
+
+      <h2>The Real Learning Happens Now</h2>
+      <p>Here's where it started clicking for me. I changed the exit code:</p>
+
+      <pre><code>    mov rax, 60
+    mov rdi, 7
+    syscall</code></pre>
+
+      <p>Reassembled, relinked, ran it. Same output: <code>Hello, World!</code>. Then:</p>
+
+      <pre><code>$ echo $?
+7</code></pre>
+
+      <p>That's when everything connected. The number was right there in the register. The shell just read it. Nothing magical. It's all just numbers flowing through registers.</p>
+
+      <p>Then I changed the message:</p>
+
+      <pre><code>    msg db "Hello, Appu!", 10</code></pre>
+
+      <p>Assembled, linked, ran it. The string printed. And I realized my mind had automatically kept asking: "Did I break the length calculation?" But I didn't — <code>len equ $ - msg</code> recalculated itself automatically at assemble time. The answer is built in.</p>
+
+      <p>Finally, I printed the message twice by duplicating the syscall block (no loops, just copy-paste):</p>
+
+      <pre><code>_start:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg
+    mov rdx, len
+    syscall
+
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg
+    mov rdx, len
+    syscall
+
+    mov rax, 60
+    mov rdi, 0
+    syscall</code></pre>
+
+      <p>Output: message printed twice. Still no magic — just instructions running one after another.</p>
+
+      <h2>Next</h2>
+      <p>Lesson 2: data sizes, register parts, and arithmetic. The fundamentals getting deeper.</p>
+
+      <hr />
+      <p>This whole lesson is about seeing the machine as it actually is: registers, memory, syscalls. Nothing is hidden. That clarity is why assembly is worth learning — even if you never write it professionally again.</p>
+    </article>
+  </main>
+</body>
+</html>
