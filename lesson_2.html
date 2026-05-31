@@ -35,25 +35,55 @@
     .wrap {
       max-width: 860px;
       margin: 0 auto;
-      padding: 2rem 1rem 4rem;
+      padding: 2.5rem 1rem 4rem;
     }
 
-    .back-link {
-      display: inline-flex;
+    .navbar {
+      background: rgba(250, 253, 255, 0.8);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+    }
+
+    .nav-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      color: var(--accent);
-      text-decoration: none;
+    }
+
+    .nav-back {
       font-family: system-ui, -apple-system, sans-serif;
       font-size: 0.95rem;
       font-weight: 600;
-      margin-bottom: 1.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
       transition: transform 0.2s ease, color 0.2s ease;
     }
 
-    .back-link:hover {
+    .nav-back:hover {
       color: #125c8f;
-      transform: translateX(-4px);
+      transform: translateX(-3px);
+    }
+
+    .nav-github {
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-github:hover {
+      color: var(--ink);
+      transform: scale(1.1);
     }
 
     article {
@@ -192,14 +222,23 @@
   </style>
 </head>
 <body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Journal
+      </a>
+      <a href="https://github.com/RCHKaushalya" target="_blank" class="nav-github" title="Visit my GitHub Profile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+      </a>
+    </div>
+  </nav>
   <main class="wrap">
-    <a href="index.html" class="back-link">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      Back to Journal
-    </a>
     <article>
       <h1>Lesson 2: Registers, Sub-registers, and the Power of Memory Brackets</h1>
       <p class="meta">Series: NASM Learning | Platform: Ubuntu/Linux x86-64</p>
