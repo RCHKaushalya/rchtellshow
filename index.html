@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>My Assembly Tutor Journal</title>
   <meta name="description" content="A personal journal documenting my journey learning x86-64 NASM assembly programming from the ground up, with the guidance of an expert mentor." />
+  <link rel="icon" type="image/png" href="avatar.png" />
   <style>
     :root {
       --bg: #eaf6ff;
@@ -37,30 +38,16 @@
       padding: 3rem 1rem 5rem;
     }
 
-    .avatar-link {
+    .github-link {
       display: inline-block;
       margin-bottom: 1.25rem;
-      text-decoration: none;
-      position: relative;
-      border-radius: 50%;
-      padding: 3px;
-      background: linear-gradient(135deg, var(--accent), var(--line));
-      box-shadow: 0 4px 15px rgba(29, 127, 194, 0.2);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+      color: var(--muted);
+      transition: color 0.2s ease, transform 0.2s ease;
     }
 
-    .avatar-link:hover {
-      transform: scale(1.08) rotate(3deg);
-      box-shadow: 0 8px 25px rgba(29, 127, 194, 0.4);
-    }
-
-    .profile-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-      border: 3px solid var(--paper);
+    .github-link:hover {
+      color: var(--ink);
+      transform: scale(1.15);
     }
 
     header {
@@ -196,8 +183,10 @@
 <body>
   <main class="wrap">
     <header>
-      <a href="https://github.com/RCHKaushalya" target="_blank" class="avatar-link" title="Visit my GitHub Profile">
-        <img src="avatar.png" alt="Rasindu's Avatar" class="profile-avatar" />
+      <a href="https://github.com/RCHKaushalya" target="_blank" class="github-link" title="Visit my GitHub Profile">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="github-icon">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
       </a>
       <h1>My Assembly Tutor Journal</h1>
       <p class="subtitle">An interactive log of learning x86-64 NASM from the metal up</p>
