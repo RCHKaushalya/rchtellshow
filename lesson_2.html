@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lesson 2: Registers, Sub-registers, and the Power of Memory Brackets - My Assembly Tutor Journal</title>
+  <meta name="description" content="Lesson 2 of NASM learning: physical sub-registers, memory bracket dereferencing, quadwords/words, gdb debugging, and LEA vs MOV." />
+  <style>
+    :root {
+      --bg: #eaf6ff;
+      --paper: #fafdff;
+      --ink: #102033;
+      --muted: #4a647d;
+      --accent: #1d7fc2;
+      --line: #c9e4f7;
+      --code-bg: #edf7ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, #ffffff 0, transparent 45%),
+        radial-gradient(circle at 100% 0, #d8efff 0, transparent 38%),
+        var(--bg);
+      line-height: 1.65;
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #125c8f;
+      transform: translateX(-4px);
+    }
+
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 12px 32px rgba(15, 56, 92, 0.12);
+    }
+
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin-top: 1.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      letter-spacing: 0.01em;
+    }
+
+    h2 {
+      font-size: clamp(1.25rem, 2vw, 1.6rem);
+      color: var(--accent);
+    }
+
+    h3 {
+      font-size: clamp(1.1rem, 1.8vw, 1.3rem);
+      color: var(--ink);
+    }
+
+    p {
+      margin: 0.7rem 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+    }
+
+    code {
+      font-family: "Cascadia Mono", Consolas, Menlo, monospace;
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.05rem 0.35rem;
+      font-size: 0.95em;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+
+    pre code {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      display: block;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin: 0.35rem 0;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent);
+      padding: 0.75rem 1rem;
+      background: #e8f5ff;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--code-bg);
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: #fcfdfe;
+    }
+
+    .dialogue {
+      background: #f7fbfe;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .dialogue p {
+      margin: 0.5rem 0;
+    }
+
+    .dialogue strong {
+      color: var(--accent);
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 640px) {
+      article {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a href="index.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back to Journal
+    </a>
+    <article>
+      <h1>Lesson 2: Registers, Sub-registers, and the Power of Memory Brackets</h1>
+      <p class="meta">Series: NASM Learning | Platform: Ubuntu/Linux x86-64</p>
+
+      <p>Lesson 1 was a thrill. Hearing the CPU execute raw machine instructions and seeing "Hello, World!" print to the screen made me feel closer to the hardware than ever. But as I sat down for Lesson 2, my mentor quickly showed me that we were barely scratching the surface of how the CPU actually stores and manipulates data. This lesson was full of "aha!" moments, simple mistakes on my part, and a deep-dive into the ultimate developer tool: the debugger.</p>
+
+      <h2>1. The Russian Dolls Inside Your CPU</h2>
+      <p>Up until now, I've been using registers like <code>rax</code>, <code>rdi</code>, <code>rsi</code>, and <code>rdx</code> as single, giant 64-bit storage containers. But here is the mind-bending reality: <strong>each register is actually four registers in one.</strong></p>
+      
+      <p>They aren't separate physical slots. Instead, they are different-sized windows looking into the exact same physical storage space. Let's look at <code>rax</code> as the primary example:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Register Name</th>
+            <th>Size</th>
+            <th>Which Bits It Accesses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>rax</code></td>
+            <td>64-bit</td>
+            <td>The whole physical register (8 bytes)</td>
+          </tr>
+          <tr>
+            <td><code>eax</code></td>
+            <td>32-bit</td>
+            <td>The lower half (bits 0–31)</td>
+          </tr>
+          <tr>
+            <td><code>ax</code></td>
+            <td>16-bit</td>
+            <td>The lower 16 bits (bits 0–15)</td>
+          </tr>
+          <tr>
+            <td><code>al</code></td>
+            <td>8-bit</td>
+            <td>The lowest 8 bits (bits 0–7)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>If <code>rax</code> holds the 64-bit hexadecimal value <code>0x0000000000000042</code>, then looking through the smaller windows gives us: <code>eax = 0x00000042</code>, <code>ax = 0x0042</code>, and <code>al = 0x42</code>. It's the same physical silicon, just chopped up into smaller addressable units. This allows us to work on individual bytes without disturbing or wasting the rest of the register.</p>
+
+      <div class="dialogue">
+        <p><strong>Mentor:</strong> "Let's put this to the test. If <code>rax</code> holds the value <code>0x00000000AABBCCDD</code>, what would each sub-register contain? Reason it out."</p>
+        <p><strong>Me:</strong> "Okay, let's see:</p>
+        <ul>
+          <li><code>eax</code> = <code>0xAABBCCDD</code> (last 32 bit)</li>
+          <li><code>ax</code> = <code>0xCCDD</code> (last 8 bit)</li>
+          <li><code>al</code> = <code>0xDD</code> (last 4 bit)"</li>
+        </ul>
+        <p><strong>Mentor:</strong> "Almost perfect! The values are 100% correct, but your bit labels are mixed up. <code>ax</code> is 16 bits (2 bytes), and <code>al</code> is 8 bits (1 byte). Remember, two hexadecimal digits equal exactly one byte (8 bits). <code>0xDD</code> is one full byte, not 4 bits!"</p>
+      </div>
+
+      <p>That correction immediately clarified things. A single hex digit is 4 bits (a nibble), so two hex digits (like <code>DD</code>) represent a full 8-bit byte. </p>
+
+      <p>My mentor also pointed out that there is a high-byte sub-register called <code>ah</code>, which accesses the upper byte of <code>ax</code> (the bits 8–15). For example, if <code>ax = 0xCCDD</code>, then <code>ah = 0xCC</code> and <code>al = 0xDD</code>. However, this is a legacy feature left over from the old 16-bit 8086 era. It only exists for the classic registers (<code>rax</code>, <code>rbx</code>, <code>rcx</code>, <code>rdx</code>). The newer registers added in later architectures (like <code>rsi</code>, <code>rdi</code>, or <code>r8</code>–<code>r15</code>) do not have an <code>h</code> variant—only low-byte windows!</p>
+
+      <h2>2. The Workhorse of Assembly: <code>mov</code></h2>
+      <p>The most common instruction you'll write in assembly is <code>mov</code>. It copies data from a source to a destination. The syntax is:</p>
+      <pre><code>mov destination, source</code></pre>
+      
+      <p>You have to train your brain to read this from <strong>right to left</strong>: <em>"take the source, copy it into the destination."</em> It can copy between registers, from memory to registers, from registers to memory, or load a literal number directly.</p>
+
+      <div class="note">
+        <p><strong>Important:</strong> <code>mov</code> is actually a <strong>copy</strong> instruction. It doesn't empty or clear the source register. After <code>mov rbx, rax</code>, both registers hold the identical value.</p>
+      </div>
+
+      <h2>3. The Registers Experiment</h2>
+      <p>To see this in action, we wrote a small, silent program called <code>registers.asm</code>:</p>
+
+      <pre><code>section .data
+    val dq 0x00000000AABBCCDD
+
+section .text
+    global _start
+
+_start:
+    mov rax, [val]
+    mov rbx, rax
+
+    mov rax, 60
+    mov rdi, 0
+    syscall</code></pre>
+
+      <p>My mentor asked me three questions about this script that forced me to unpack what was happening:</p>
+
+      <p><strong>Question 1: What does <code>dq</code> mean?</strong><br>
+      Knowing that <code>db</code> stands for "define byte" (1 byte), I guessed that <code>dq</code> meant "quarter word" storing 64 bits. My mentor corrected the term: it actually stands for <strong>define quadword</strong>. Here is the size hierarchy in x86-64 assembly:</p>
+      
+      <ul>
+        <li><code>db</code>: Define Byte (1 byte / 8 bits)</li>
+        <li><code>dw</code>: Define Word (2 bytes / 16 bits)</li>
+        <li><code>dd</code>: Define Doubleword (4 bytes / 32 bits)</li>
+        <li><code>dq</code>: Define Quadword (8 bytes / 64 bits) — fits a 64-bit register perfectly!</li>
+      </ul>
+
+      <p><strong>Question 2: Why does <code>mov rax, [val]</code> have brackets, but <code>mov rax, 60</code> does not?</strong><br>
+      This is the golden rule of assembly. <code>val</code> is just a label representing a memory address (a number pointing to RAM). 
+      <ul>
+        <li>Without brackets, <code>val</code> gives you the raw address itself.</li>
+        <li>With brackets, <code>[val]</code> dereferences the pointer. It means: <strong>"Go to the address called <code>val</code>, read the actual bytes stored there, and bring them back."</strong></li>
+      </ul>
+      Meanwhile, <code>60</code> is just a literal number—no memory lookup needed.</p>
+
+      <h2>4. Watching the CPU's Heartbeat with GDB</h2>
+      <p>Running a program that exits silently without output is boring. To solve this, my mentor introduced me to the debugger: <code>gdb</code>. This lets us peek inside the CPU chip and watch the registers change in real-time as each line of assembly executes.</p>
+
+      <p>Here is how to set it up in WSL:</p>
+      <pre><code># Install GDB
+sudo apt install gdb
+
+# Assemble and Link with Debug Symbols (-g -F dwarf)
+nasm -f elf64 -g -F dwarf registers.asm -o registers.o
+ld registers.o -o registers
+
+# Run the program under GDB
+gdb ./registers</code></pre>
+
+      <p>Inside the GDB prompt, I typed these commands:</p>
+      <pre><code>(gdb) break _start
+(gdb) run
+(gdb) layout regs</code></pre>
+
+      <p>Instantly, a gorgeous split-screen panel appeared showing all the CPU registers! I stepped through the instructions one-by-one by typing <code>si</code> (step instruction):</p>
+
+      <div class="dialogue">
+        <p><strong>Me:</strong> "Wow, this is amazing. I can see everything changing line by line!"</p>
+        <p><strong>Mentor:</strong> "What values did you see in GDB?"</p>
+        <p><strong>Me:</strong> "After the first <code>si</code> (executing <code>mov rax, [val]</code>), <code>rax</code> immediately showed <code>0xaabbccdd 2864434397</code>. And before the next instruction, <code>rbx</code> was sitting at <code>0x0 0</code>, but after the next <code>si</code>, it became <code>0xaabbccdd 2864434397</code>!"</p>
+        <p><strong>Mentor:</strong> "Excellent. You can see GDB shows both the hex and decimal value of the register at once. To the CPU, they are identical. Also, notice that <code>rbx</code> started at exactly <code>0x0</code>. The operating system actively zeroes out registers before passing control to your program for security reasons, so no leftover junk remains from other processes. Watching this in real-time shows you facts, not guesses."</p>
+      </div>
+
+      <h2>5. The Subtle Art of Address Loading: LEA vs MOV</h2>
+      <p>Next, we covered <code>lea</code> (Load Effective Address), which is often confused with <code>mov</code>.
+      <ul>
+        <li><code>mov rax, [val]</code> goes to the address of <code>val</code> and copies the <strong>contents</strong> (data) stored there into <code>rax</code>.</li>
+        <li><code>lea rax, [val]</code> loads the <strong>address</strong> (pointer) of <code>val</code> itself into <code>rax</code>.</li>
+      </ul>
+      In our Lesson 1 Hello World program, we did <code>mov rsi, msg</code> to pass the address of our string to the kernel. We could have written <code>lea rsi, [msg]</code> and it would produce the exact same instruction. It's all about whether we want the address or the contents.</p>
+
+      <h2>6. Separating Code and Data: The Two-String Program</h2>
+      <p>To cement these concepts, I wrote <code>twostrings.asm</code>, a program that prints my name (Rasindu) and the name of the assembler (NASM) on separate lines:</p>
+
+      <pre><code>section .data
+    name db "Rasindu", 10
+    namelen equ $ - name
+    lang db "NASM", 10
+    langlen equ $ - lang
+
+section .text
+    global _start
+
+_start:
+    ; print name
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, name
+    mov rdx, namelen
+    syscall
+
+    ; print lang
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, lang
+    mov rdx, langlen
+    syscall
+
+    mov rax, 60
+    mov rdi, 0
+    syscall</code></pre>
+
+      <p>I assembled and ran it, and it output:</p>
+      <pre><code>Rasindu
+NASM</code></pre>
+
+      <p>My mentor challenged me to swap the print blocks so "NASM" printed first, and asked what needed to change. I swapped the syscall instructions in the <code>.text</code> section, left the <code>.data</code> section completely untouched, and it compiled and ran perfectly in the new order! </p>
+      
+      <p>This proved a fundamental lesson: <strong>data and code are entirely independent</strong>. Data simply sits in memory. The code section decides where to look and what to do with it by loading the addresses we choose into registers.</p>
+
+      <p>We also analyzed the line <code>langlen equ $ - lang</code>. When NASM processes this, it has already written <code>name</code> (8 bytes: "Rasindu" + newline) into memory. When it reaches this line, the assembler counter symbol <code>$</code> points exactly to the address immediately following the <code>lang</code> string. By subtracting <code>lang</code> from <code>$</code>, we get the precise length of the language string alone. Order in the data section matters because the assembler processes everything sequentially!</p>
+
+      <h2>Summary of week two:</h2>
+      <ul>
+        <li><strong>Sub-registers are windows:</strong> <code>rax</code>, <code>eax</code>, <code>ax</code>, and <code>al</code> let you touch 64, 32, 16, or 8 bits of the same physical storage.</li>
+        <li><strong>Brackets mean lookups:</strong> <code>[val]</code> reads the data inside the address, while <code>val</code> is just the address number itself.</li>
+        <li><strong>Size descriptors:</strong> <code>dq</code> (quadword = 8 bytes), <code>dd</code> (doubleword = 4 bytes), <code>dw</code> (word = 2 bytes), and <code>db</code> (byte = 1 byte) declare different allocations.</li>
+        <li><strong>GDB reveals the truth:</strong> Using <code>layout regs</code> in the debugger lets you watch registers change instruction-by-instruction.</li>
+        <li><strong>Data vs Code:</strong> Data stays put in RAM. Your instructions decide what to do with it, and in what order.</li>
+      </ul>
+
+      <hr />
+      <p>Moving from silent memory reads to live GDB tracing was the highlight of this week. Once you see the registers changing in front of your eyes, the magic fades, and you are left with pure, beautiful logic. Next up: Lesson 3 and arithmetic!</p>
+    </article>
+  </main>
+</body>
+</html>
