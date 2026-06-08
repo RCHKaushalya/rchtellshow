@@ -1,10 +1,12 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>My Assembly Tutor Journal</title>
-  <meta name="description" content="A personal journal documenting my journey learning x86-64 NASM assembly programming from the ground up, with the guidance of an expert mentor." />
+  <meta name="description"
+    content="A personal journal documenting my journey learning x86-64 NASM assembly programming from the ground up, with the guidance of an expert mentor." />
   <link rel="icon" type="image/png" href="avatar.png" />
   <style>
     :root {
@@ -207,19 +209,24 @@
       .wrap {
         padding: 2rem 1rem 3rem;
       }
+
       .lesson-card {
         padding: 1.5rem;
       }
     }
   </style>
 </head>
+
 <body>
   <nav class="navbar">
     <div class="nav-container">
       <a href="index.html" class="nav-brand">Tutor Journal</a>
       <a href="https://github.com/RCHKaushalya" target="_blank" class="nav-github" title="Visit my GitHub Profile">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+          </path>
         </svg>
       </a>
     </div>
@@ -231,20 +238,29 @@
     </header>
 
     <div class="journal-intro">
-      <p style="margin: 0;">This journal documents my weekly lessons with an assembly language mentor. Moving away from high-level abstractions like JavaScript and Python, I am exploring how instructions flow through CPU registers, how memory operates under constraints, and how a compiled program talks directly to the Linux kernel.</p>
+      <p style="margin: 0;">Hi, I'm <strong>Rasindu</strong>. I created this journal to document my weekly learning
+        sessions with an assembly language mentor. Moving away from high-level abstractions like JavaScript and Python,
+        I am learning x86-64 NASM assembly to pull back the curtain and understand exactly how instructions flow through
+        CPU registers, how memory operates under physical constraints, and how a compiled program talks directly to the
+        Linux kernel. This space is for other developers, students, and low-level enthusiasts who want to demystify
+        compilation and see the computer for what it really is: a machine running pure logic.</p>
     </div>
 
+
     <section class="lessons-list">
-      
+
       <!-- Lesson 1 Card -->
       <a href="lesson_1.html" class="lesson-card">
         <span class="lesson-badge">Lesson 1</span>
         <h2>From Zero to Hello World in NASM</h2>
         <div class="lesson-meta">Series: NASM Learning | Platform: Ubuntu/Linux x86-64</div>
-        <p class="lesson-teaser">Breaking through high-level abstractions to understand what the CPU is actually doing underneath. Discover registers, stack and memory basics, and learn how to print text to the screen using raw system calls (syscalls).</p>
+        <p class="lesson-teaser">Breaking through high-level abstractions to understand what the CPU is actually doing
+          underneath. Discover registers, stack and memory basics, and learn how to print text to the screen using raw
+          system calls (syscalls).</p>
         <span class="read-more">
-          Read Lesson 
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          Read Lesson
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
@@ -256,10 +272,31 @@
         <span class="lesson-badge">Lesson 2</span>
         <h2>Registers, Sub-registers, and the Power of Memory Brackets</h2>
         <div class="lesson-meta">Series: NASM Learning | Platform: Ubuntu/Linux x86-64</div>
-        <p class="lesson-teaser">Peeking into the physical sub-registers (rax, eax, ax, al) and exploring the absolute rules of memory brackets. Featuring real-time tracing of instruction movement using the GDB debugger, and printing multiple strings by separating code and data.</p>
+        <p class="lesson-teaser">Peeking into the physical sub-registers (rax, eax, ax, al) and exploring the absolute
+          rules of memory brackets. Featuring real-time tracing of instruction movement using the GDB debugger, and
+          printing multiple strings by separating code and data.</p>
         <span class="read-more">
-          Read Lesson 
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          Read Lesson
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </span>
+      </a>
+
+      <!-- Lesson 3 Card -->
+      <a href="lesson_3.html" class="lesson-card">
+        <span class="lesson-badge">Lesson 3</span>
+        <h2>Arithmetic, Logic, and the ASCII Conversion Story</h2>
+        <div class="lesson-meta">Series: NASM Learning | Platform: Ubuntu/Linux x86-64</div>
+        <p class="lesson-teaser">Diving into CPU arithmetic instructions, the silent role of the rflags register, and
+          the division register quirks. Explaining the logic of XORing registers to zero, and the mind-bending
+          realization of how CPUs see digits as ASCII codes.</p>
+        <span class="read-more">
+          Read Lesson
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
@@ -269,8 +306,9 @@
     </section>
 
     <footer>
-      <p>© 2026 Rasindu. Powered by NASM & pure logic.</p>
+      <p>© 2026 Rasindu.</p>
     </footer>
   </main>
 </body>
+
 </html>

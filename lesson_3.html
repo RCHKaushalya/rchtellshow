@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lesson 3: Arithmetic, Logic, and the ASCII Conversion Story - My Assembly Tutor Journal</title>
+  <meta name="description" content="Lesson 3 of NASM learning: CPU arithmetic instructions, flags, division register quirks, bitwise logic, and printing numbers using ASCII conversion." />
+  <link rel="icon" type="image/png" href="avatar.png" />
+  <style>
+    :root {
+      --bg: #eaf6ff;
+      --paper: #fafdff;
+      --ink: #102033;
+      --muted: #4a647d;
+      --accent: #1d7fc2;
+      --line: #c9e4f7;
+      --code-bg: #edf7ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, #ffffff 0, transparent 45%),
+        radial-gradient(circle at 100% 0, #d8efff 0, transparent 38%),
+        var(--bg);
+      line-height: 1.65;
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .navbar {
+      background: rgba(250, 253, 255, 0.8);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+    }
+
+    .nav-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-back {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-back:hover {
+      color: #125c8f;
+      transform: translateX(-3px);
+    }
+
+    .nav-github {
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-github:hover {
+      color: var(--ink);
+      transform: scale(1.1);
+    }
+
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 12px 32px rgba(15, 56, 92, 0.12);
+    }
+
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin-top: 1.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      letter-spacing: 0.01em;
+    }
+
+    h2 {
+      font-size: clamp(1.25rem, 2vw, 1.6rem);
+      color: var(--accent);
+    }
+
+    h3 {
+      font-size: clamp(1.1rem, 1.8vw, 1.3rem);
+      color: var(--ink);
+    }
+
+    p {
+      margin: 0.7rem 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+    }
+
+    code {
+      font-family: "Cascadia Mono", Consolas, Menlo, monospace;
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.05rem 0.35rem;
+      font-size: 0.95em;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+
+    pre code {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      display: block;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+    }
+
+    li {
+      margin: 0.35rem 0;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent);
+      padding: 0.75rem 1rem;
+      background: #e8f5ff;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--code-bg);
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: #fcfdfe;
+    }
+
+    .dialogue {
+      background: #f7fbfe;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .dialogue p {
+      margin: 0.5rem 0;
+    }
+
+    .dialogue strong {
+      color: var(--accent);
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 640px) {
+      article {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Journal
+      </a>
+      <a href="https://github.com/RCHKaushalya" target="_blank" class="nav-github" title="Visit my GitHub Profile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+      </a>
+    </div>
+  </nav>
+  <main class="wrap">
+    <article>
+      <h1>Lesson 3: Arithmetic, Logic, and the ASCII Conversion Story</h1>
+      <p class="meta">Series: NASM Learning | Platform: Ubuntu/Linux x86-64</p>
+
+      <p>In the first two lessons, we learned how to set up our environment, interface with the Linux kernel, move bytes around, and peek inside registers. But computers aren't just filing cabinets; they are calculators. In Lesson 3, my mentor and I dove into the core instructions that allow the CPU to perform calculations: arithmetic and bitwise logic. Along the way, we demystified the zero flag, discovered some quirky register constraints for division, and hit a profound realization about what numbers actually look like to a computer.</p>
+
+      <h2>1. The Core Arithmetic Instructions</h2>
+      <p>The CPU has dedicated instructions for basic math. The most fundamental ones operate directly on registers in place:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Instruction</th>
+            <th>What it does</th>
+            <th>C/JS Equivalent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>add dst, src</code></td>
+            <td>Adds <code>src</code> to <code>dst</code>, saving the result in <code>dst</code></td>
+            <td><code>dst += src</code></td>
+          </tr>
+          <tr>
+            <td><code>sub dst, src</code></td>
+            <td>Subtracts <code>src</code> from <code>dst</code>, saving the result in <code>dst</code></td>
+            <td><code>dst -= src</code></td>
+          </tr>
+          <tr>
+            <td><code>inc dst</code></td>
+            <td>Increments <code>dst</code> by 1</td>
+            <td><code>dst++</code></td>
+          </tr>
+          <tr>
+            <td><code>dec dst</code></td>
+            <td>Decrements <code>dst</code> by 1</td>
+            <td><code>dst--</code></td>
+          </tr>
+          <tr>
+            <td><code>imul dst, src</code></td>
+            <td>Multiplies <code>dst</code> by <code>src</code>, saving the result in <code>dst</code></td>
+            <td><code>dst *= src</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Note that there is no separate "result" register for these operations—the answer overwrites the destination (the first operand).</p>
+
+      <h2>2. The Hidden Watcher: <code>rflags</code></h2>
+      <p>Here is something standard high-level language tutorials completely gloss over: <strong>every arithmetic instruction silently updates a special CPU register called <code>rflags</code>.</strong></p>
+      <p>You never write to <code>rflags</code> directly. Instead, the CPU automatically sets or clears individual bits (flags) in this register depending on the result of the calculation. Two flags are crucial for logic and loops:</p>
+      <ul>
+        <li><strong>ZF (Zero Flag):</strong> Set to <code>1</code> if the result of the operation was exactly zero. Otherwise, it is <code>0</code>.</li>
+        <li><strong>SF (Sign Flag):</strong> Set to <code>1</code> if the result was negative. Otherwise, it is <code>0</code>.</li>
+      </ul>
+
+      <hr />
+
+      <h2>3. Reason Before You Code: The Step-by-Step Test</h2>
+      <p>Before jumping into assembly, my mentor wanted to test my ability to track register states mentally. He gave me this sequence of instructions:</p>
+
+      <pre><code>mov rax, 10
+mov rbx, 3
+add rax, rbx
+sub rax, 1
+inc rax
+imul rax, rbx</code></pre>
+
+      <div class="dialogue">
+        <p><strong>Mentor:</strong> "Before writing anything, tell me what you think the value in <code>rax</code> will be after each line, step by step."</p>
+        <p><strong>Me:</strong> "Let's trace it through:</p>
+        <ul>
+          <li><code>mov rax, 10</code> &rarr; <code>rax = 10</code></li>
+          <li><code>mov rbx, 3</code> &rarr; <code>rax = 10</code> (and <code>rbx = 3</code>)</li>
+          <li><code>add rax, rbx</code> &rarr; <code>rax = 13</code> (which is 10 + 3)</li>
+          <li><code>sub rax, 1</code> &rarr; <code>rax = 12</code> (which is 13 - 1)</li>
+          <li><code>inc rax</code> &rarr; <code>rax = 13</code> (incrementing 12)</li>
+          <li><code>imul rax, rbx</code> &rarr; <code>rax = 39</code> (which is 13 * 3)"</li>
+        </ul>
+        <p><strong>Mentor:</strong> "Perfect. Every single value correct. Now let's verify it using the actual program and GDB."</p>
+      </div>
+
+      <p>I wrote the code into a file called <code>arithmetic.asm</code>:</p>
+      <pre><code>section .text
+    global _start
+
+_start:
+    mov rax, 10
+    mov rbx, 3
+    add rax, rbx
+    sub rax, 1
+    inc rax
+    imul rax, rbx
+
+    mov rax, 60
+    mov rdi, 0
+    syscall</code></pre>
+
+      <p>I compiled and linked it with debug flags, then fired up GDB:</p>
+      <pre><code>nasm -f elf64 -g -F dwarf arithmetic.asm -o arithmetic.o
+ld arithmetic.o -o arithmetic
+gdb ./arithmetic</code></pre>
+
+      <p>Inside GDB, I loaded the registers layout and stepped through using <code>si</code> (step instruction):</p>
+      <pre><code>(gdb) break _start
+(gdb) run
+(gdb) layout regs</code></pre>
+      <p>As expected, <code>rax</code> updated exactly as we predicted, ending at <code>39</code> (or <code>0x27</code> in hex).</p>
+
+      <h2>4. The Extra Experiment: Catching the Zero Flag</h2>
+      <p>While stepping through the instructions, my mentor told me to look closely at the <code>eflags</code> row in the GDB registers panel. After <code>sub rax, 1</code> (where <code>rax</code> becomes 12), the <code>eflags</code> output showed <code>0x202 [IF]</code> (or <code>0x206 [PE_IF]</code> depending on the environment). The Zero Flag (ZF) was absent.</p>
+      <p>Then, he asked me to add one line to the code right before the exit syscall: <code>sub rax, 39</code>. Since <code>rax</code> was 39, subtracting 39 would reduce it to 0. I stepped to that instruction in GDB and watched the flags closely.</p>
+      
+      <div class="dialogue">
+        <p><strong>Me:</strong> "Aha! After running <code>sub rax, 39</code>, the register <code>rax</code> becomes 0, and the flags register immediately changed from <code>eflags 0x202 [IF]</code> to <code>eflags 0x246 [PE ZF_IF]</code>. There is a new <code>ZF</code> flag listed!"</p>
+        <p><strong>Mentor:</strong> "Excellent observation. You caught exactly what matters. When <code>rax</code> hit 0, the CPU set the Zero Flag (<code>ZF</code>) automatically. You didn't write an instruction to do that—it is a hardware-level reaction. This flag is the bedrock of control flow. Next week, we will write jumps that check this exact flag to make decisions. That is how loop boundaries and <code>if-else</code> structures are built."</p>
+      </div>
+
+      <hr />
+
+      <h2>5. Division: The Quirky Exception</h2>
+      <p>While addition, subtraction, and multiplication are simple in-place operations, division (<code>div</code> and <code>idiv</code>) works differently and is much more restricted. You cannot divide two arbitrary registers.</p>
+      <p>Instead, the <code>idiv</code> instruction uses a fixed combination of registers:</p>
+      <pre><code>mov rax, 39      ; Dividend (lower 64 bits) goes in rax
+mov rbx, 3       ; Divisor (can be any general register)
+xor rdx, rdx     ; IMPORTANT: Clear rdx first!
+idiv rbx         ; rax = quotient (13), rdx = remainder (0)</code></pre>
+
+      <p>There are two major gotchas here:</p>
+      <ol>
+        <li><strong>The 128-bit Dividend:</strong> The division instruction assumes your dividend is 128 bits wide, combining <code>rdx</code> (for the upper 64 bits) and <code>rax</code> (for the lower 64 bits) into <code>rdx:rax</code>. If <code>rdx</code> contains leftover garbage values from previous instructions, the CPU will try to divide a massive number and produce an overflow error or garbage results. That is why we must clear <code>rdx</code> first!</li>
+        <li><strong>Fixed Destination:</strong> After <code>idiv rbx</code> runs, the CPU automatically puts the <strong>quotient</strong> in <code>rax</code> and the <strong>remainder</strong> in <code>rdx</code>. You don't get a say in this; it's physically hardwired into the CPU.</li>
+      </ol>
+
+      <div class="note">
+        <p><strong>Why <code>xor rdx, rdx</code>?</strong> XORing a register with itself is the standard, idiom-proven way to zero out a register in assembly. It is faster and results in a smaller binary size compared to writing <code>mov rdx, 0</code> because the CPU executes register-to-register self-operations in a single clock cycle without loading an immediate value.</p>
+      </div>
+
+      <h2>6. The CLI Calculator Program</h2>
+      <p>To practice division, I was tasked with writing a calculator program (<code>calc.asm</code>) that evaluates the expression <code>(20 + 4) / 3</code> and returns the remainder as the program's exit code, allowing us to inspect it using <code>echo $?</code> in the shell.</p>
+
+      <p>Here is the completed code:</p>
+      <pre><code>section .text
+    global _start
+
+_start:
+    mov rax, 20
+    mov rbx, 4
+    add rax, rbx      ; rax = 20 + 4 = 24
+
+    mov rcx, 3
+    xor rdx, rdx      ; clear rdx for division
+    idiv rcx          ; rax = quotient (8), rdx = remainder (0)
+
+    mov rax, 60
+    mov rdi, rdx      ; exit code = remainder
+    syscall</code></pre>
+
+      <p>We built it and ran it:</p>
+      <pre><code>$ nasm -f elf64 calc.o -o calc.asm
+$ ld calc.o -o calc
+$ ./calc
+$ echo $?
+0</code></pre>
+      <p>Since 24 is perfectly divisible by 3, the remainder in <code>rdx</code> is <code>0</code>, which matches the exit code! To make it more interesting, we changed the dividend from 20 to 25. Now the expression is <code>(25 + 4) / 3 = 29 / 3</code>. I predicted a quotient of <code>9</code> and a remainder of <code>2</code>. We built and ran it again:</p>
+      <pre><code>$ ./calc
+$ echo $?
+2</code></pre>
+      <p>It worked flawlessly! The remainder was indeed <code>2</code>.</p>
+
+      <hr />
+
+      <h2>7. Bitwise Logic Instructions</h2>
+      <p>Beyond arithmetic, the CPU can manipulate values bit-by-bit. These instructions compare individual bits in parallel:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Instruction</th>
+            <th>What it does</th>
+            <th>Bit Logic Rule</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>and dst, src</code></td>
+            <td>Bitwise AND</td>
+            <td><code>1</code> only if both bits are <code>1</code></td>
+          </tr>
+          <tr>
+            <td><code>or dst, src</code></td>
+            <td>Bitwise OR</td>
+            <td><code>1</code> if either bit is <code>1</code></td>
+          </tr>
+          <tr>
+            <td><code>xor dst, src</code></td>
+            <td>Bitwise Exclusive OR</td>
+            <td><code>1</code> if the bits are different</td>
+          </tr>
+          <tr>
+            <td><code>not dst</code></td>
+            <td>Bitwise NOT</td>
+            <td>Flips all bits (0 becomes 1, and vice-versa)</td>
+          </tr>
+          <tr>
+            <td><code>shl dst, count</code></td>
+            <td>Shift Left</td>
+            <td>Shifts bits left (effectively multiplies by 2<sup>count</sup>)</td>
+          </tr>
+          <tr>
+            <td><code>shr dst, count</code></td>
+            <td>Shift Right</td>
+            <td>Shifts bits right (effectively divides by 2<sup>count</sup>)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Why XORing to Zero Works (In Plain English)</h3>
+      <p>Many assembly beginners get confused by <code>xor rdx, rdx</code>. To understand why it zeroes a register, look at the XOR rule: <em>the output is <code>1</code> if and only if the inputs are different.</em></p>
+      <p>If you XOR a register with itself, you are comparing every bit with its own copy. A bit is never different from itself—a <code>1</code> matches a <code>1</code>, and a <code>0</code> matches a <code>0</code>. Because every single bit matches, every single comparison outputs <code>0</code>. Consequently, the entire register is instantly cleared to zero. It is clean, elegant, and highly optimized by CPU hardware designers.</p>
+
+      <h3>Three Practical Logic Use Cases</h3>
+      <pre><code>xor rax, rax        ; Zero out rax (faster than mov rax, 0)
+and rax, 0xFF       ; Keep only the lowest byte (al), clearing the top 56 bits
+shl rax, 1          ; Multiply rax by 2 (bit shifting is faster than imul!)</code></pre>
+
+      <hr />
+
+      <h2>8. The Real Project: The ASCII Story</h2>
+      <p>At the end of the lesson, my mentor gave me a new problem: <strong>how do you print a number to the screen?</strong></p>
+      <p>In Lesson 1, we printed strings by pointing the <code>write</code> syscall at a memory address holding character bytes. But if <code>rax = 9</code>, we can't just pass <code>rax</code> to <code>write</code>. If we point the write syscall at an address containing the raw value <code>9</code>, it will attempt to output the character with ASCII code 9 (which is a horizontal tab), not the character symbol <code>"9"</code>!</p>
+      <p>This led to a major "aha!" moment. <strong>The CPU has absolutely no concept of what the character "9" looks like.</strong> It does not know about symbols, fonts, or screens. It only knows numbers. To make the terminal print a visible <code>9</code>, we have to send the numerical value <strong><code>57</code></strong>—the ASCII code representing the character symbol <code>'9'</code>.</p>
+      <p>The translation rule is simple: since the ASCII code for <code>'0'</code> is <code>48</code>, any single digit can be converted to its ASCII character value by adding 48:</p>
+      <pre><code>ASCII character = digit + 48</code></pre>
+
+      <p>To print the quotient of <code>(25 + 4) / 3</code>, we wrote a program that converts the division result to ASCII and saves it in a memory buffer before calling <code>write</code>:</p>
+
+      <pre><code>section .data
+    result db 0, 10        ; 1 byte for our ASCII character, 1 byte for newline (10)
+
+section .text
+    global _start
+
+_start:
+    mov rax, 25
+    mov rbx, 4
+    add rax, rbx      ; rax = 29
+
+    mov rcx, 3
+    xor rdx, rdx      ; zero rdx
+    idiv rcx          ; rax = quotient (9), rdx = remainder (2)
+
+    ; rax holds 9. Convert to ASCII: 9 + 48 = 57 ('9')
+    add rax, 48
+    mov [result], al  ; Store only the low-byte into our memory buffer!
+
+    ; print our 2-byte result buffer (digit + newline)
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, result
+    mov rdx, 2
+    syscall
+
+    ; exit with the remainder (rdx = 2) as the exit code
+    mov rax, 60
+    mov rdi, rdx
+    syscall</code></pre>
+
+      <p>Let's compile and run it:</p>
+      <pre><code>$ nasm -f elf64 calc.asm -o calc.o
+$ ld calc.o -o calc
+$ ./calc
+9
+$ echo $?
+2</code></pre>
+      <p>Seeing that number <code>9</code> print out on the screen, followed by checking the exit code and seeing the remainder <code>2</code>, felt incredibly satisfying. The program communicated two separate outputs simultaneously through two completely different channels!</p>
+
+      <h3>Size Matching: Why We Used <code>al</code></h3>
+      <p>Notice the line <code>mov [result], al</code>. We stored the 8-bit register <code>al</code> instead of the full 64-bit <code>rax</code>. Why?</p>
+      <p>In our data section, we defined <code>result db 0, 10</code>. The <code>db</code> directive allocates exactly one byte for the digit and one byte for the newline character. If we wrote <code>mov [result], rax</code>, we would attempt to write 8 full bytes starting at the <code>result</code> address. This would overwrite our newline byte (10) and corrupt the next 7 bytes of adjacent memory. By using the low-byte register <code>al</code>, we write exactly 1 byte, matching the memory slot size perfectly. In assembly, <strong>always match your register size to your memory size!</strong></p>
+
+      <hr />
+
+      <h2>Summary of Lesson 3:</h2>
+      <ul>
+        <li><strong>Basic Arithmetic:</strong> <code>add</code>, <code>sub</code>, <code>inc</code>, <code>dec</code>, and <code>imul</code> modify registers in place.</li>
+        <li><strong>Division Constraints:</strong> <code>idiv</code> uses <code>rdx:rax</code> as a 128-bit dividend. Always clear <code>rdx</code> (via <code>xor rdx, rdx</code>) first, and expect the quotient in <code>rax</code> and remainder in <code>rdx</code>.</li>
+        <li><strong>The Zero Flag (ZF):</strong> The CPU silently sets <code>ZF = 1</code> in the <code>rflags</code> register whenever a calculation results in zero. GDB allows us to trace this live.</li>
+        <li><strong>Bitwise Operations:</strong> Instructions like <code>and</code>, <code>or</code>, <code>xor</code>, <code>not</code>, and bit shifts (<code>shl</code>, <code>shr</code>) manipulate individual bits.</li>
+        <li><strong>XOR Self-Zeroing:</strong> XORing any value with itself results in 0 because no bit is ever different from itself.</li>
+        <li><strong>ASCII Rule:</strong> Printing digits requires adding 48 to convert numerical values to their corresponding ASCII characters (e.g., <code>9</code> becomes <code>57</code>).</li>
+        <li><strong>Size Matching:</strong> Use appropriately sized sub-registers (like <code>al</code> for bytes) when moving data into allocated memory slots to avoid memory corruption.</li>
+      </ul>
+
+      <hr />
+      <p>Tracing values step-by-step, monitoring flags change under the hood, and converting calculations to screen characters showed me how math turns into logic, and logic turns into interface. Next lesson, we dive into loops and jumps, where we'll use these flags to build real control structures!</p>
+    </article>
+  </main>
+</body>
+</html>
